@@ -86,7 +86,7 @@
 									 (loop
 											(dprint :debug "Dispatching heartbeat!")
 											(send-heartbeat bot)
-											(sleep seconds))))))
+											(sleep seconds)))) :name "heartbeat-thread"))
 
 
 
@@ -381,21 +381,20 @@
 				(send-resume bot)
 				(send-identify bot))))
 
-
-
-
 (defun disconnect (bot &optional reason code)
   (let ((out *error-output*))
-    (bt:join-thread
+;    (bt:join-thread
      (bt:make-thread
       (lambda ()
-				(let ((*error-output* out))
+				(let ((*error-output* out)
+              (thread (bot-heartbeat-thread bot)))
 					(dprint :info "~a disconnecting...~%"
 									(if (bot-user bot) (lc:name (bot-user bot))))
 					(wsd:close-connection (bot-conn bot) reason code)
 					(setf (bot-seq bot) 0)
 					(setf (bot-session-id bot) nil)
-					(bt:destroy-thread (bot-heartbeat-thread bot))))))))
+          (if (bt:thread-alive-p thread)
+					    (bt:destroy-thread thread)))))))
 
 (defun cleanup (bot)
   (dprint :warn "Cleanup loop engaged!~%Bot: ~a" (lc:name (bot-user bot)))
