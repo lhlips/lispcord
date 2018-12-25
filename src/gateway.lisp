@@ -196,7 +196,7 @@
 
 
 (defun on-reaction (data bot kind)
-  (let ((emoji (cache :emoji (gethash "emoji" data)))
+  (let ((emoji (gethash "name" (gethash "emoji" data)))
 				(user (getcache-id (parse-snowflake (gethash "user_id" data))
 													 :user))
 				(channel (getcache-id (parse-snowflake (gethash "channel_id" data))
